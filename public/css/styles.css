@@ -53,4 +53,21 @@ body {
 
 .track-image{
   width: 35%;
+  background-color: white;
+  border-radius: 10%;
+  margin-right:3rem
+}
+
+.information-card {
+  background-color: #F3F4F4;
+  max-width: 400px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.information-card h2 {
+  margin: 0;
+  overflow-wrap: break-word;
+  text-align: center;
 }
