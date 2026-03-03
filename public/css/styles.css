@@ -44,3 +44,13 @@ body {
 .form-submit:hover {
   background: #1D546D;
 }
+
+.result-container{
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.track-image{
+  width: 35%;
+}

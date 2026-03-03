@@ -14,14 +14,25 @@ app.get("/",(req,res)=>{
     res.render("index.ejs");
 });
 
-app.post("/",async(req,res)=>{
-    try{
-    const response = await axios.get(`${API_URL}/sessions?session_key=${req.body.session}`);
-    const data = response.data;
-    res.render("index.ejs",{});
-    }catch (error){
-        console.log(error.response.data);
-    }
+app.post("/", async (req, res) => {
+  try {
+    const sessionResponse = await axios.get(
+      `${API_URL}/sessions?session_key=${req.body.session}`
+    );
+    const sessionData = sessionResponse.data;
+
+    const meetingResponse = await axios.get(
+      `${API_URL}/meetings?circuit_key=${sessionData[0].circuit_key}&year=${req.body.year}`
+    );
+    const meetingData = meetingResponse.data;
+
+    const imageURL = meetingData[0].circuit_image;
+    // console.log(imageURL);
+
+    res.render("index.ejs", { image: imageURL });
+  } catch (error) {
+    console.log(error.response?.data || error.message);
+  }
 });
 
 app.listen(port, () => {
