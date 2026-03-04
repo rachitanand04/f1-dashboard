@@ -49,25 +49,43 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 3rem;
   margin-top: 2rem;
   background-color: #1D546D;
   padding: 1rem;
 }
 
 .track-image{
-  width: 35%;
+  max-width: 500px;
   background-color: white;
   border-radius: 10%;
-  margin-right:3rem
+  /* margin-right:3rem */
+}
+
+@media (max-width: 860px) {
+  .information-container {
+    flex-direction: column;  
+    align-items: center;
+  }
+
+  .track-image,
+  .information-card {
+    width: 100%;            
+    max-width: 500px;
+    margin-left: 1rem;  
+    margin-right: 1rem; 
+  }
+
+  .title{
+    font-size: 2rem;
+  }
 }
 
 .information-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
   background-color: #F3F4F4;
   max-width: 400px;
-  width: 100%;
   padding: 16px;
   border-radius: 10px;
 }
