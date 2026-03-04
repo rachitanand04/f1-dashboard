@@ -48,7 +48,10 @@ body {
 .information-container{
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 2rem;
+  background-color: #1D546D;
+  padding: 1rem;
 }
 
 .track-image{
@@ -59,6 +62,9 @@ body {
 }
 
 .information-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background-color: #F3F4F4;
   max-width: 400px;
   width: 100%;
@@ -70,4 +76,41 @@ body {
   margin: 0;
   overflow-wrap: break-word;
   text-align: center;
+  font-family: "anta";
+}
+
+.information-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* 2 columns */
+  grid-template-rows: 1fr 1fr;   /* 2 rows */
+  gap: 15px;                       /* space between boxes */
+  margin-top: 20px;
+}
+
+.grid-item {
+  background-color: #333;
+  padding: 15px;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.information-grid-container h3{
+  color: white;
+  font-size: 1.2rem;
+  font-family: "Anta";
+}
+
+.information-grid-container h3.date{
+  color: white;
+  font-size: 1.2rem;
+}
+
+.country-flag img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
 }

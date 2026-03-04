@@ -2,6 +2,25 @@
   <img src="<%= meetingInfo.circuit_image %>" class="track-image" />
   <div class="information-card">
     <h2><%= meetingInfo.meeting_official_name %></h2>
-    <hr />
+    <div class="information-grid-container">
+      <div class="grid-item country-flag">
+        <img src=<%= meetingInfo.country_flag %>>
+      </div>
+      <div class="grid-item">
+        <h3>
+          <%= session.location %>
+        </h3>
+      </div>
+      <div class="grid-item">
+        <h3>
+          <%= session.session_name %>
+        </h3>
+      </div>
+      <div class="grid-item">
+        <h3 class="date">
+          <%= session.date_start %>
+        </h3>
+      </div>
+    </div>
   </div>
 </div>
