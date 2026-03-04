@@ -22,12 +22,9 @@ app.post("/", async (req, res) => {
     const sessionData = sessionResponse.data;
 
     const meetingResponse = await axios.get(
-      `${API_URL}/meetings?circuit_key=${sessionData[0].circuit_key}&year=${req.body.year}`,
+      `${API_URL}/meetings?meeting_key=${sessionData[0].meeting_key}&year=${req.body.year}`,
     );
     const meetingData = meetingResponse.data;
-
-    // const imageURL = meetingData[0].circuit_image;
-    // console.log(imageURL);
 
     res.render("index.ejs", {
       meetingInfo: meetingData[0],

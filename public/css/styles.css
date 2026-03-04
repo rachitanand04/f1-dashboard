@@ -45,7 +45,7 @@ body {
   background: #1D546D;
 }
 
-.result-container{
+.information-container{
   display: flex;
   justify-content: center;
   margin-top: 2rem;
