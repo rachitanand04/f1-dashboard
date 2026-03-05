@@ -1,3 +1,25 @@
 <div class="result-container">
-    
+  <div class="result-grid">
+    <% if(session.session_type === "Practice"){ %>
+    <% sessionResult.forEach((result)=>{ %>
+    <div class="result-item">
+      <div class="result-left">
+        <h3><%= result.position %></h3>
+        <% var driverInfo = driver.find(d=>d.driver_number===result.driver_number) %>
+        <%if(driverInfo.headshot_url){%>
+            <img class="driver-image" src=<%= driverInfo.headshot_url%>>
+        <%}else{%>
+            <img class="driver-image" src="svg/person-circle.svg">
+        <% } %>
+        
+        <h3><%= driverInfo.name_acronym%> </h3>
+      </div>
+      <div class="result-right">
+        <h3><%= result.duration %></h3>
+        <h3><%= result.number_of_laps %> Laps</h3>
+      </div>
+    </div>
+    <% }) %>
+    <% } %>
+  </div>
 </div>

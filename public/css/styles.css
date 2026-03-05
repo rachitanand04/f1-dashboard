@@ -132,3 +132,49 @@ body {
   height: auto;
   border-radius: 8px;
 }
+
+.result-container{
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.result-grid{
+  display: grid;
+  gap: 0.5rem;
+  width: 70%;
+  grid-template-columns: auto;
+}
+
+.result-grid h3{
+  font-family: "anta";
+}
+
+.result-item{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0.1rem 1.5rem;
+  background-color: #5F9598;
+  border-radius: 3rem;
+  width: 100%;
+}
+
+.result-left{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.result-right{
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.driver-image{
+  height: 3rem;
+  background-color: white;
+  border-radius: 50%;
+}

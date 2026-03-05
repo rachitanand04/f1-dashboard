@@ -6,6 +6,7 @@ const API_URL = "https://api.openf1.org/v1";
 
 const app = express();
 const port = 3000;
+const delay = ms => new Promise(r => setTimeout(r, ms));
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,6 +21,7 @@ app.post("/", async (req, res) => {
     const sessionResponse = await axios.get(
       `${API_URL}/sessions?session_key=${session_key}`,
     );
+    await delay(350);
     const sessionData = sessionResponse.data;
 
     const rawDate = sessionData[0].date_start;
@@ -33,18 +35,29 @@ app.post("/", async (req, res) => {
     const meetingResponse = await axios.get(
       `${API_URL}/meetings?meeting_key=${sessionData[0].meeting_key}&year=${req.body.year}`,
     );
+    await delay(350);
     const meetingData = meetingResponse.data;
 
     const sessionResultResponse = await axios.get(
       `${API_URL}/session_result?session_key=${session_key}`,
     );
+    await delay(350);
     const sessionResultData = sessionResultResponse.data;
-    // console.log(sessionResultData);
-    // console.log(sessionData);
+    sessionResultData.forEach((item)=>{
+      item.duration = formatLapTime(item.duration);
+    })
+
+    const driverResponse = await axios.get(
+      `${API_URL}/drivers?session_key=${session_key}`,
+    );
+    await delay(350);
+    const driverData = driverResponse.data;
+
     res.render("index.ejs", {
       session: sessionData[0],
       meetingInfo: meetingData[0],
       sessionResult: sessionResultData,
+      driver: driverData,
     });
   } catch (error) {
     console.log(error.response?.data || error.message);
@@ -54,3 +67,11 @@ app.post("/", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+function formatLapTime(time) {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    const milliseconds = Math.round((time % 1) * 1000);
+
+    return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}:${String(milliseconds).padStart(3,'0')}`;
+}
