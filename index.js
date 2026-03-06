@@ -69,9 +69,20 @@ app.listen(port, () => {
 });
 
 function formatLapTime(time) {
+  if(Array.isArray(time)){
+    var modifiedArray = [];
+    time.forEach((lap)=>{
+    const minutes = Math.floor(lap / 60);
+    const seconds = Math.floor(lap % 60);
+    const milliseconds = Math.round((lap % 1) * 1000);
+
+    modifiedArray.push(`${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}:${String(milliseconds).padStart(3,'0')}`);
+    });
+  }else{
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     const milliseconds = Math.round((time % 1) * 1000);
-
     return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}:${String(milliseconds).padStart(3,'0')}`;
+  }
+  return modifiedArray;
 }

@@ -170,7 +170,7 @@ body {
 .result-right{
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .driver-image{

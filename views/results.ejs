@@ -4,14 +4,19 @@
     <% sessionResult.forEach((result)=>{ %>
     <div class="result-item">
       <div class="result-left">
-        <h3><%= result.position %></h3>
+        <h3>
+          <% if(result.position){ %>
+            <%= result.position %>
+          <%}else{%>
+            -
+          <%}%>
+        </h3>
         <% var driverInfo = driver.find(d=>d.driver_number===result.driver_number) %>
         <%if(driverInfo.headshot_url){%>
         <img class="driver-image" src=<%= driverInfo.headshot_url%>>
         <%}else{%>
         <img class="driver-image" src="svg/person-circle.svg">
         <% } %>
-
         <h3><%= driverInfo.name_acronym%> </h3>
       </div>
       <div class="result-right">
@@ -24,42 +29,88 @@
     <% sessionResult.forEach((result)=>{ %>
     <div class="result-item">
       <div class="result-left">
-        <% if(result.position){ %>
-          <h3><%= result.position %></h3>
+        <h3>
+          <% if(result.position){ %>
+            <%= result.position %>
           <%}else{%>
-            <h3>-</h3>
+            -
           <%}%>
+        </h3>
         <% var driverInfo = driver.find(d=>d.driver_number===result.driver_number) %>
         <%if(driverInfo.headshot_url){%>
         <img class="driver-image" src=<%= driverInfo.headshot_url%>>
         <%}else{%>
         <img class="driver-image" src="svg/person-circle.svg">
         <% } %>
-
         <h3><%= driverInfo.name_acronym%> </h3>
       </div>
       <div class="result-right">
-        <% if (result.dnf || result.dns || result.dsq) { %>
-        <% if (result.dnf) { %>
-        <h3>DNF</h3>
-        <% } else if (result.dns) { %>
-        <h3>DNS</h3>
-        <% } else { %>
-        <h3>DSQ</h3>
-        <% } %>
-        <% } else if(result.gap_to_leader === 0) { %>
-        <h3>Leader</h3>
-        <%}else if(typeof(result.gap_to_leader)==="string"){%>
-          <h3> <%= result.gap_to_leader %> </h3>
+        <h3>
+          <% if (result.dnf || result.dns || result.dsq) { %>
+            <% if (result.dnf) { %>
+              DNF<h3>
+            <% } else if (result.dns) { %>
+              DNS<h3>
+            <% } else { %>
+              DSQ
+            <% } %>
+          <% } else if(result.gap_to_leader === 0) { %>
+            Leader
+          <%}else if(typeof(result.gap_to_leader)==="string"){%>
+            <%= result.gap_to_leader %> 
+          <% }else{ %>
+            <%= Number(result.gap_to_leader).toFixed(3) %> 
+          <%}%>
+        </h3>
+        <% if (!(result.dns || result.dsq)) { %>
+        <h3><%= String(result.number_of_laps).padStart(2, '0') %> Laps</h3>
         <% }else{ %>
-          <h3> <%= Number(result.gap_to_leader).toFixed(3) %> </h3>
-        <%}%>
-
-<% if (!(result.dns || result.dsq)) { %>
-  <h3><%= String(result.number_of_laps).padStart(2, '0') %> Laps</h3>
-<% }else{ %>
-  <h3 style="margin-left: 4.1rem;">-</h3>
-  <% } %>
+        <h3 style="margin-left: 2.8rem;">-</h3>/
+        <% } %>
+      </div>
+    </div>
+    <% }) %>
+    <% }else{ %>
+    <% sessionResult.forEach((result)=>{ %>
+    <div class="result-item">
+      <div class="result-left">
+        <h3>
+          <% if(result.position){ %>
+            <%= result.position %>
+          <%}else{%>
+            -
+          <%}%>
+        </h3>
+        <% var driverInfo = driver.find(d=>d.driver_number===result.driver_number) %>
+        <%if(driverInfo.headshot_url){%>
+        <img class="driver-image" src=<%= driverInfo.headshot_url%>>
+        <%}else{%>
+        <img class="driver-image" src="svg/person-circle.svg">
+        <% } %>
+        <h3><%= driverInfo.name_acronym%> </h3>
+      </div>
+      <div class="result-right">
+        <h3>
+          <% if (result.duration[0] === "00:00:000") { %>
+          No Time
+          <% } else { %>
+          <%= result.duration[0] %>
+          <% } %>
+        </h3>
+        <h3>
+          <% if (result.duration[1] === "00:00:000") { %>
+          No Time
+          <% } else { %>
+          <%= result.duration[1] %>
+          <% } %>
+        </h3>
+        <h3>
+          <% if (result.duration[2] === "00:00:000") { %>
+          No Time
+          <% } else { %>
+          <%= result.duration[2] %>
+          <% } %>
+        </h3>
       </div>
     </div>
     <% }) %>
