@@ -178,3 +178,28 @@ body {
   background-color: white;
   border-radius: 50%;
 }
+
+.laps-graph-container{
+  display: flex;
+  margin-top: 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#laps-chart{
+  background-color: white;
+  border-radius: 1rem;
+}
+
+#tooltip{
+  position:absolute;
+  font-family: "anta";
+  background:#1D546D;
+  color:white;
+  padding:6px 8px;
+  border-radius:4px;
+  font-size:12px;
+  pointer-events:none;
+  opacity:0;
+}
