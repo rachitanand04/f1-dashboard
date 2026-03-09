@@ -93,16 +93,17 @@ function renderGraph(data) {
     .x((d) => x(d.lap))
     .y((d) => y(d.time));
 
-const path = svg.append("path")
+  const path = svg
+    .append("path")
     .datum(cleanData)
     .attr("fill", "none")
     .attr("stroke", "#5F9598")
     .attr("stroke-width", 2)
     .attr("d", line);
 
-const length = path.node().getTotalLength();
+  const length = path.node().getTotalLength();
 
-path
+  path
     .attr("stroke-dasharray", length + " " + length)
     .attr("stroke-dashoffset", length)
     .transition()
