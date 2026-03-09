@@ -36,4 +36,69 @@ $("document").ready(() => {
         }
     })
   })
+
+  $(".laps.form").on("submit", function (e) {
+    e.preventDefault();
+
+    $.post("/graph", $(this).serialize(), function (data) {
+        renderGraph(data);
+    });
+    });
 });
+
+function renderGraph(data) {
+
+    const cleanData = data
+        .filter(d => d.lap_number != null && d.lap_duration != null)
+        .map(d => ({
+            lap: Number(d.lap_number),
+            time: Number(d.lap_duration)
+        }));
+
+    d3.select("#laps-chart").selectAll("*").remove();
+
+    const width = 900;
+    const height = 450;
+
+    const margin = {
+        top: 20,
+        right: 20,
+        bottom: 50,
+        left: 60
+    };
+
+    const svg = d3.select("#laps-chart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const x = d3.scaleLinear()
+        .domain(d3.extent(cleanData, d => d.lap))
+        .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleLinear()
+        .domain(d3.extent(cleanData, d => d.time))
+        .range([height - margin.bottom, margin.top]);
+
+    const line = d3.line()
+        .x(d => x(d.lap))
+        .y(d => y(d.time));
+
+    svg.append("path")
+        .datum(cleanData)
+        .attr("fill", "none")
+        .attr("stroke", "red")
+        .attr("stroke-width", 2)
+        .attr("d", line);
+
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
+
+    svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(yAxis);
+}

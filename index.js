@@ -3,6 +3,7 @@ import axios, { Axios } from "axios";
 import bodyParser from "body-parser";
 
 const API_URL = "https://api.openf1.org/v1";
+var session_key;
 
 const app = express();
 const port = 3000;
@@ -17,7 +18,7 @@ app.get("/", (req, res) => {
 
 app.post("/", async (req, res) => {
   try {
-    const session_key = req.body.session;
+    session_key = req.body.session;
     const sessionResponse = await axios.get(
       `${API_URL}/sessions?session_key=${session_key}`,
     );
@@ -65,7 +66,13 @@ app.post("/", async (req, res) => {
 });
 
 app.post("/graph",async(req,res)=>{
-  res.sendStatus(200);
+  try{
+    const driver = req.body.driver;
+    const lapsResponse = await axios.get(`${API_URL}/laps?session_key=${session_key}&driver_number=${driver}`);
+    res.json(lapsResponse.data);
+  }catch(error){
+    console.log(error.response?.data || error.message);
+  }
 });
 
 app.listen(port, () => {
