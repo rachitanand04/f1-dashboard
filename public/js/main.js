@@ -50,7 +50,34 @@ $("document").ready(() => {
       renderGraph(data);
     });
   });
+
+  $("#lap-reset").on("click",function(){
+    svg.selectAll("*").remove();
+    lineIndex = 0;
+  })
 });
+
+const width = 900;
+const height = 450;
+
+const margin = {
+  top: 20,
+  right: 20,
+  bottom: 50,
+  left: 60,
+};
+
+const svg = d3
+  .select("#laps-chart")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+let x = d3.scaleLinear().range([margin.left, width - margin.right]);
+let y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+
+const color = d3.scaleOrdinal(d3.schemeCategory10);
+let lineIndex = 0;
 
 function renderGraph(data) {
   const cleanData = data
@@ -60,33 +87,8 @@ function renderGraph(data) {
       time: Number(d.lap_duration),
     }));
 
-  d3.select("#laps-chart").selectAll("*").remove();
-
-  const width = 900;
-  const height = 450;
-
-  const margin = {
-    top: 20,
-    right: 20,
-    bottom: 50,
-    left: 60,
-  };
-
-  const svg = d3
-    .select("#laps-chart")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  const x = d3
-    .scaleLinear()
-    .domain(d3.extent(cleanData, (d) => d.lap))
-    .range([margin.left, width - margin.right]);
-
-  const y = d3
-    .scaleLinear()
-    .domain(d3.extent(cleanData, (d) => d.time))
-    .range([height - margin.bottom, margin.top]);
+  x.domain(d3.extent(cleanData, (d) => d.lap));
+  y.domain(d3.extent(cleanData, (d) => d.time));
 
   const line = d3
     .line()
@@ -97,7 +99,7 @@ function renderGraph(data) {
     .append("path")
     .datum(cleanData)
     .attr("fill", "none")
-    .attr("stroke", "#5F9598")
+    .attr("stroke", color(lineIndex))
     .attr("stroke-width", 2)
     .attr("d", line);
 
@@ -111,18 +113,16 @@ function renderGraph(data) {
     .ease(d3.easeLinear)
     .attr("stroke-dashoffset", 0);
 
-  const xAxis = d3.axisBottom(x);
-  const yAxis = d3.axisLeft(y);
-
   svg
-    .selectAll("circle")
+    .selectAll(".points-" + lineIndex)
     .data(cleanData)
     .enter()
     .append("circle")
+    .attr("class", "points-" + lineIndex)
     .attr("cx", (d) => x(d.lap))
     .attr("cy", (d) => y(d.time))
     .attr("r", 4)
-    .attr("fill", "#1D546D")
+    .attr("fill", color(lineIndex))
     .on("mouseover", function (event, d) {
       d3.select("#tooltip")
         .style("opacity", 1)
@@ -134,10 +134,17 @@ function renderGraph(data) {
       d3.select("#tooltip").style("opacity", 0);
     });
 
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${height - margin.bottom})`)
-    .call(xAxis);
+  if (lineIndex === 0) {
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .call(d3.axisBottom(x));
 
-  svg.append("g").attr("transform", `translate(${margin.left}, 0)`).call(yAxis);
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .call(d3.axisLeft(y));
+  }
+
+  lineIndex++;
 }
