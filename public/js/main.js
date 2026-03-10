@@ -47,12 +47,14 @@ $("document").ready(() => {
     e.preventDefault();
 
     $.post("/graph", $(this).serialize(), function (data) {
+      $("#legend").append(`<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`)
       renderGraph(data.laps, data.pits);
     });
   });
 
   $("#lap-reset").on("click",function(){
     svg.selectAll("*").remove();
+    $("#legend").empty();
     lineIndex = 0;
   })
 });

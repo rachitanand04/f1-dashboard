@@ -72,7 +72,8 @@ app.post("/graph",async(req,res)=>{
     const pitsResponse = await axios.get(`${API_URL}/pit?session_key=${session_key}&driver_number=${driver}`);
     res.json({
       laps: lapsResponse.data,
-      pits: pitsResponse.data
+      pits: pitsResponse.data,
+      driver: driver
     });
   }catch(error){
     console.log(error.response?.data || error.message);
