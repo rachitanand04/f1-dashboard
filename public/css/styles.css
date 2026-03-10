@@ -203,3 +203,19 @@ body {
   pointer-events:none;
   opacity:0;
 }
+
+#lap-reset{
+  padding: 0.75rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #5F9598;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#lap-reset:hover {
+  background: #1D546D;
+}

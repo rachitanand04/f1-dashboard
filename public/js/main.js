@@ -47,7 +47,7 @@ $("document").ready(() => {
     e.preventDefault();
 
     $.post("/graph", $(this).serialize(), function (data) {
-      renderGraph(data);
+      renderGraph(data.laps, data.pits);
     });
   });
 
@@ -79,21 +79,24 @@ let y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 let lineIndex = 0;
 
-function renderGraph(data) {
-  const cleanData = data
-    .filter((d) => d.lap_number != null && d.lap_duration != null)
-    .map((d) => ({
+function renderGraph(lapData, pitData) {
+
+  const pitLaps = pitData.map(p => Number(p.lap_number));
+
+  const cleanData = lapData
+    .filter(d => d.lap_number != null && d.lap_duration != null)
+    .map(d => ({
       lap: Number(d.lap_number),
-      time: Number(d.lap_duration),
-    }));
+      time: Number(d.lap_duration)
+    }))
+    .filter(d => !pitLaps.includes(d.lap));
 
-  x.domain(d3.extent(cleanData, (d) => d.lap));
-  y.domain(d3.extent(cleanData, (d) => d.time));
+  x.domain(d3.extent(cleanData, d => d.lap));
+  y.domain(d3.extent(cleanData, d => d.time));
 
-  const line = d3
-    .line()
-    .x((d) => x(d.lap))
-    .y((d) => y(d.time));
+  const line = d3.line()
+    .x(d => x(d.lap))
+    .y(d => y(d.time));
 
   const path = svg
     .append("path")
@@ -113,14 +116,13 @@ function renderGraph(data) {
     .ease(d3.easeLinear)
     .attr("stroke-dashoffset", 0);
 
-  svg
-    .selectAll(".points-" + lineIndex)
+  svg.selectAll(".points-" + lineIndex)
     .data(cleanData)
     .enter()
     .append("circle")
     .attr("class", "points-" + lineIndex)
-    .attr("cx", (d) => x(d.lap))
-    .attr("cy", (d) => y(d.time))
+    .attr("cx", d => x(d.lap))
+    .attr("cy", d => y(d.time))
     .attr("r", 4)
     .attr("fill", color(lineIndex))
     .on("mouseover", function (event, d) {
@@ -135,16 +137,28 @@ function renderGraph(data) {
     });
 
   if (lineIndex === 0) {
-    svg
-      .append("g")
+
+    svg.append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
       .call(d3.axisBottom(x));
 
-    svg
-      .append("g")
+    svg.append("g")
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y));
   }
+
+  svg.selectAll(".pit-marker-" + lineIndex)
+    .data(pitLaps)
+    .enter()
+    .append("line")
+    .attr("class", "pit-marker-" + lineIndex)
+    .attr("x1", d => x(d))
+    .attr("x2", d => x(d))
+    .attr("y1", margin.top)
+    .attr("y2", height - margin.bottom)
+    .attr("stroke", color(lineIndex))
+    .attr("stroke-width", 1.5)
+    .attr("stroke-dasharray", "6,4");
 
   lineIndex++;
 }
