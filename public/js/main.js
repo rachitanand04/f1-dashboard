@@ -47,16 +47,29 @@ $("document").ready(() => {
     e.preventDefault();
 
     $.post("/graph", $(this).serialize(), function (data) {
-      $("#legend").append(`<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`)
+      $("#legend").append(
+        `<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`,
+      );
       renderGraph(data.laps, data.pits);
+      if (data.type === "Qualifying") {
+        const fastestLap = data.laps
+          .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
+          .reduce((min, lap) =>
+            lap.lap_duration < min.lap_duration ? lap : min,
+          );
+        // console.log(fastestLap);
+        const start = new Date(fastestLap.date_start);
+        const end = new Date(start.getTime() + fastestLap.lap_duration * 1000);
+        // console.log(`Start = ${start} End = ${end}`);
+      }
     });
   });
 
-  $("#lap-reset").on("click",function(){
+  $("#lap-reset").on("click", function () {
     svg.selectAll("*").remove();
     $("#legend").empty();
     lineIndex = 0;
-  })
+  });
 });
 
 const width = 900;
@@ -82,23 +95,23 @@ const color = d3.scaleOrdinal(d3.schemeCategory10);
 let lineIndex = 0;
 
 function renderGraph(lapData, pitData) {
-
-  const pitLaps = pitData.map(p => Number(p.lap_number));
+  const pitLaps = pitData.map((p) => Number(p.lap_number));
 
   const cleanData = lapData
-    .filter(d => d.lap_number != null && d.lap_duration != null)
-    .map(d => ({
+    .filter((d) => d.lap_number != null && d.lap_duration != null)
+    .map((d) => ({
       lap: Number(d.lap_number),
-      time: Number(d.lap_duration)
+      time: Number(d.lap_duration),
     }))
-    .filter(d => !pitLaps.includes(d.lap));
+    .filter((d) => !pitLaps.includes(d.lap));
 
-  x.domain(d3.extent(cleanData, d => d.lap));
-  y.domain(d3.extent(cleanData, d => d.time));
+  x.domain(d3.extent(cleanData, (d) => d.lap));
+  y.domain(d3.extent(cleanData, (d) => d.time));
 
-  const line = d3.line()
-    .x(d => x(d.lap))
-    .y(d => y(d.time));
+  const line = d3
+    .line()
+    .x((d) => x(d.lap))
+    .y((d) => y(d.time));
 
   const path = svg
     .append("path")
@@ -118,13 +131,14 @@ function renderGraph(lapData, pitData) {
     .ease(d3.easeLinear)
     .attr("stroke-dashoffset", 0);
 
-  svg.selectAll(".points-" + lineIndex)
+  svg
+    .selectAll(".points-" + lineIndex)
     .data(cleanData)
     .enter()
     .append("circle")
     .attr("class", "points-" + lineIndex)
-    .attr("cx", d => x(d.lap))
-    .attr("cy", d => y(d.time))
+    .attr("cx", (d) => x(d.lap))
+    .attr("cy", (d) => y(d.time))
     .attr("r", 4)
     .attr("fill", color(lineIndex))
     .on("mouseover", function (event, d) {
@@ -139,23 +153,25 @@ function renderGraph(lapData, pitData) {
     });
 
   if (lineIndex === 0) {
-
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
       .call(d3.axisBottom(x));
 
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(y));
   }
 
-  svg.selectAll(".pit-marker-" + lineIndex)
+  svg
+    .selectAll(".pit-marker-" + lineIndex)
     .data(pitLaps)
     .enter()
     .append("line")
     .attr("class", "pit-marker-" + lineIndex)
-    .attr("x1", d => x(d))
-    .attr("x2", d => x(d))
+    .attr("x1", (d) => x(d))
+    .attr("x2", (d) => x(d))
     .attr("y1", margin.top)
     .attr("y2", height - margin.bottom)
     .attr("stroke", color(lineIndex))

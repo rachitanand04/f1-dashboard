@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 
 const API_URL = "https://api.openf1.org/v1";
 var session_key;
+var session_type;
 
 const app = express();
 const port = 3000;
@@ -24,6 +25,8 @@ app.post("/", async (req, res) => {
     );
     await delay(350);
     const sessionData = sessionResponse.data;
+    session_type = sessionData[0].session_type;
+    console.log(session_type);
 
     const rawDate = sessionData[0].date_start;
     const formattedDate = new Date(rawDate).toLocaleDateString("en-IN", {
@@ -71,6 +74,7 @@ app.post("/graph",async(req,res)=>{
     const lapsResponse = await axios.get(`${API_URL}/laps?session_key=${session_key}&driver_number=${driver}`);
     const pitsResponse = await axios.get(`${API_URL}/pit?session_key=${session_key}&driver_number=${driver}`);
     res.json({
+      type: session_type,
       laps: lapsResponse.data,
       pits: pitsResponse.data,
       driver: driver
