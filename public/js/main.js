@@ -28,7 +28,6 @@ $("document").ready(() => {
 
   $(".select.circuit").on("change", async function () {
     const circuit = $(this).val();
-    console.log(circuit);
     const data = response.data;
 
     const sessionSelect = $(".select.session");
@@ -46,27 +45,79 @@ $("document").ready(() => {
   $(".laps.form").on("submit", function (e) {
     e.preventDefault();
 
-    $.post("/graph", $(this).serialize(), function (data) {
+    $.post("/graph", $(this).serialize(), async function (data) {
       $("#legend").append(
         `<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`,
       );
+
       renderGraph(data.laps, data.pits);
-      if (data.type === "Qualifying") {
-        const fastestLap = data.laps
-          .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
-          .reduce((min, lap) =>
-            lap.lap_duration < min.lap_duration ? lap : min,
-          );
-        // console.log(fastestLap);
-        const start = new Date(fastestLap.date_start);
-        const end = new Date(start.getTime() + fastestLap.lap_duration * 1000);
-        // console.log(`Start = ${start} End = ${end}`);
+
+      const fastestLap = data.laps
+        .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
+        .reduce((min, lap) =>
+          lap.lap_duration < min.lap_duration ? lap : min,
+        );
+
+      const start = new Date(fastestLap.date_start);
+      const end = new Date(start.getTime() + fastestLap.lap_duration * 1000);
+      const session_key = fastestLap.session_key;
+
+      try {
+        const carResponse = await axios.get(
+          `https://api.openf1.org/v1/car_data?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
+        );
+
+        const locationResponse = await axios.get(
+          `https://api.openf1.org/v1/location?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
+        );
+
+        const carData = carResponse.data;
+        const locationData = locationResponse.data;
+
+        const speedMap = new Map();
+        carData.forEach((p) => speedMap.set(p.date, p.speed));
+
+        const distanceSpeed = [];
+        let totalDistance = 0;
+
+        let carIndex = 0;
+
+        for (let i = 1; i < locationData.length; i++) {
+          const prev = locationData[i - 1];
+          const curr = locationData[i];
+
+          const dx = curr.x - prev.x;
+          const dy = curr.y - prev.y;
+
+          const segment = Math.sqrt(dx * dx + dy * dy) / 10000;
+          totalDistance += segment;
+
+          const locTime = new Date(curr.date).getTime();
+
+          while (
+            carIndex < carData.length - 1 &&
+            new Date(carData[carIndex].date).getTime() < locTime
+          ) {
+            carIndex++;
+          }
+
+          const speed = carData[carIndex].speed;
+
+          distanceSpeed.push({
+            distance: totalDistance,
+            speed: speed,
+          });
+        }
+        renderSpeedGraph(distanceSpeed);
+      } catch (error) {
+        console.log(error);
       }
     });
   });
 
   $("#lap-reset").on("click", function () {
     svg.selectAll("*").remove();
+    speedSvg.selectAll("*").remove();
     $("#legend").empty();
     lineIndex = 0;
   });
@@ -177,6 +228,55 @@ function renderGraph(lapData, pitData) {
     .attr("stroke", color(lineIndex))
     .attr("stroke-width", 1.5)
     .attr("stroke-dasharray", "6,4");
+}
+
+const speedSvg = d3
+  .select("#speed-chart")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+let sx = d3.scaleLinear().range([margin.left, width - margin.right]);
+let sy = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+
+function renderSpeedGraph(data) {
+  sx.domain(d3.extent(data, (d) => d.distance));
+  sy.domain(d3.extent(data, (d) => d.speed));
+
+  const line = d3
+    .line()
+    .x((d) => sx(d.distance))
+    .y((d) => sy(d.speed));
+
+  if (lineIndex === 0) {
+    speedSvg
+      .append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(sx));
+
+    speedSvg
+      .append("g")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(d3.axisLeft(sy));
+  }
+
+  const path = speedSvg
+    .append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", color(lineIndex))
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  const length = path.node().getTotalLength();
+
+  path
+    .attr("stroke-dasharray", `${length} ${length}`)
+    .attr("stroke-dashoffset", length)
+    .transition()
+    .duration(3000)
+    .ease(d3.easeLinear)
+    .attr("stroke-dashoffset", 0);
 
   lineIndex++;
 }
