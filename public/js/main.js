@@ -51,9 +51,11 @@ $("document").ready(() => {
       );
 
       if (data.session_type !== "Race") {
-        $("#laps-chart").empty();
-        $("#laps-chart").append("<h1 id='test'> Not available for Qualifying </h1>");
+        $("#laps-chart").hide();
+        $("#lap-title").hide();
       }else{
+        $("#laps-chart").show();
+        $("#lap-title").show();
         renderGraph(data.laps, data.pits, data.number_of_laps);
       }
 
