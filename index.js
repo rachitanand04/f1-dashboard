@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 const API_URL = "https://api.openf1.org/v1";
 var session_key;
 var session_type;
+var number_of_laps;
 
 const app = express();
 const port = 3000;
@@ -46,6 +47,7 @@ app.post("/", async (req, res) => {
     );
     await delay(350);
     const sessionResultData = sessionResultResponse.data;
+    number_of_laps = sessionResultData[0].number_of_laps;
     sessionResultData.forEach((item)=>{
       item.duration = formatLapTime(item.duration);
     })
@@ -73,6 +75,8 @@ app.post("/graph",async(req,res)=>{
     const lapsResponse = await axios.get(`${API_URL}/laps?session_key=${session_key}&driver_number=${driver}`);
     const pitsResponse = await axios.get(`${API_URL}/pit?session_key=${session_key}&driver_number=${driver}`);
     res.json({
+      session_type: session_type,
+      number_of_laps: number_of_laps,
       laps: lapsResponse.data,
       pits: pitsResponse.data,
       driver: driver

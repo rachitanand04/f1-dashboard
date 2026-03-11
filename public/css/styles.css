@@ -242,3 +242,9 @@ body {
   font-family: "anta";
   margin: 0;
 }
+
+#test{
+  font-family: "anta";
+  text-align: center;
+  width: 100%;
+}

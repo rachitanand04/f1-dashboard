@@ -50,7 +50,12 @@ $("document").ready(() => {
         `<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`,
       );
 
-      renderGraph(data.laps, data.pits);
+      if (data.session_type !== "Race") {
+        $("#laps-chart").empty();
+        $("#laps-chart").append("<h1 id='test'> Not available for Qualifying </h1>");
+      }else{
+        renderGraph(data.laps, data.pits, data.number_of_laps);
+      }
 
       const fastestLap = data.laps
         .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
@@ -145,7 +150,7 @@ let y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 let lineIndex = 0;
 
-function renderGraph(lapData, pitData) {
+function renderGraph(lapData, pitData, number_of_laps) {
   const pitLaps = pitData.map((p) => Number(p.lap_number));
 
   const cleanData = lapData
@@ -156,8 +161,8 @@ function renderGraph(lapData, pitData) {
     }))
     .filter((d) => !pitLaps.includes(d.lap));
 
-  x.domain(d3.extent(cleanData, (d) => d.lap));
-  y.domain(d3.extent(cleanData, (d) => d.time));
+  x.domain([0,number_of_laps]);
+  y.domain([60,150]);
 
   const line = d3
     .line()
@@ -241,7 +246,7 @@ let sy = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 
 function renderSpeedGraph(data) {
   sx.domain(d3.extent(data, (d) => d.distance));
-  sy.domain(d3.extent(data, (d) => d.speed));
+  sy.domain([0, 350]);
 
   const line = d3
     .line()
