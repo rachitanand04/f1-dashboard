@@ -1,11 +1,11 @@
 <div class="laps-form-container">
-<form class="laps form">
-    <select name="driver" class="select driver">
-        <option value="" data-display="Select">Driver</option>
-        <% driver.forEach((driverInfo)=>{ %>
-            <option value=<%= driverInfo.driver_number %> data-display="Select"><%= driverInfo.name_acronym %></option>
-        <% }) %>
-    </select>
-    <button type="submit" class="form-submit">Go</button>
-</form>
+    <form class="laps form">
+        <select name="driver" class="select driver">
+            <option value="" data-display="Select">Driver</option>
+            <% driver.forEach((driverInfo)=>{ %>
+                <option value=<%= driverInfo.driver_number %> data-display="Select"><%= driverInfo.name_acronym %></option>
+            <% }) %>
+        </select>
+        <button type="submit" class="form-submit">Go</button>
+    </form>
 </div>

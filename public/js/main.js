@@ -44,12 +44,13 @@ $("document").ready(() => {
 
   $(".laps.form").on("submit", function (e) {
     e.preventDefault();
+    $("#loader").css("display","flex");
 
     $.post("/graph", $(this).serialize(), async function (data) {
       $("#legend").append(
         `<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`,
       );
-
+      $("#loader").hide();
       if (data.session_type !== "Race") {
         $("#laps-chart").hide();
         $("#lap-title").hide();
