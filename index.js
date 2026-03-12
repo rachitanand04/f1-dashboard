@@ -74,7 +74,7 @@ app.post("/graph",async(req,res)=>{
     const driver = req.body.driver;
     const lapsResponse = await axios.get(`${API_URL}/laps?session_key=${session_key}&driver_number=${driver}`);
     const pitsResponse = await axios.get(`${API_URL}/pit?session_key=${session_key}&driver_number=${driver}`);
-    res.json({
+    res.status(200).json({
       session_type: session_type,
       number_of_laps: number_of_laps,
       laps: lapsResponse.data,
@@ -83,6 +83,11 @@ app.post("/graph",async(req,res)=>{
     });
   }catch(error){
     console.log(error.response?.data || error.message);
+    res.status(500).json({
+    error: true,
+    message: error.message,
+    details: error.response?.data || null
+  });
   }
 });
 

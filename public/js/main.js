@@ -44,83 +44,91 @@ $("document").ready(() => {
 
   $(".laps.form").on("submit", function (e) {
     e.preventDefault();
-    $("#loader").css("display","flex");
+    $("#loader").css("display", "flex");
 
-    $.post("/graph", $(this).serialize(), async function (data) {
-      $("#legend").append(
-        `<h3 style="color: ${color(lineIndex)}"> ${data.driver} </h3>`,
-      );
-      $("#loader").hide();
-      if (data.session_type !== "Race") {
-        $("#laps-chart").hide();
-        $("#lap-title").hide();
-      }else{
-        $("#laps-chart").show();
-        $("#lap-title").show();
-        renderGraph(data.laps, data.pits, data.number_of_laps);
-      }
+    $.post("/graph", $(this).serialize())
 
-      const fastestLap = data.laps
-        .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
-        .reduce((min, lap) =>
-          lap.lap_duration < min.lap_duration ? lap : min,
+      .done(async function (data) {
+        $("#legend").append(
+          `<h3 style="color:${color(lineIndex)}">${data.driver}</h3>`,
         );
 
-      const start = new Date(fastestLap.date_start);
-      const end = new Date(start.getTime() + fastestLap.lap_duration * 1000);
-      const session_key = fastestLap.session_key;
+        if (data.session_type !== "Race") {
+          $("#laps-chart").hide();
+          $("#lap-title").hide();
+        } else {
+          $("#laps-chart").show();
+          $("#lap-title").show();
+          renderGraph(data.laps, data.pits, data.number_of_laps);
+        }
 
-      try {
-        const carResponse = await axios.get(
-          `https://api.openf1.org/v1/car_data?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
-        );
+        const fastestLap = data.laps
+          .filter((l) => l.lap_duration != null && !l.is_pit_out_lap)
+          .reduce((min, lap) =>
+            lap.lap_duration < min.lap_duration ? lap : min,
+          );
 
-        const locationResponse = await axios.get(
-          `https://api.openf1.org/v1/location?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
-        );
+        const start = new Date(fastestLap.date_start);
+        const end = new Date(start.getTime() + fastestLap.lap_duration * 1000);
+        const session_key = fastestLap.session_key;
 
-        const carData = carResponse.data;
-        const locationData = locationResponse.data;
+        try {
+          const carResponse = await axios.get(
+            `https://api.openf1.org/v1/car_data?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
+          );
 
-        const speedMap = new Map();
-        carData.forEach((p) => speedMap.set(p.date, p.speed));
+          const locationResponse = await axios.get(
+            `https://api.openf1.org/v1/location?session_key=${session_key}&driver_number=${data.driver}&date>${start.toISOString()}&date<${end.toISOString()}`,
+          );
 
-        const distanceSpeed = [];
-        let totalDistance = 0;
+          const carData = carResponse.data;
+          const locationData = locationResponse.data;
 
-        let carIndex = 0;
+          const distanceSpeed = [];
+          let totalDistance = 0;
+          let carIndex = 0;
 
-        for (let i = 1; i < locationData.length; i++) {
-          const prev = locationData[i - 1];
-          const curr = locationData[i];
+          for (let i = 1; i < locationData.length; i++) {
+            const prev = locationData[i - 1];
+            const curr = locationData[i];
 
-          const dx = curr.x - prev.x;
-          const dy = curr.y - prev.y;
+            const dx = curr.x - prev.x;
+            const dy = curr.y - prev.y;
+            const dz = curr.z - prev.z;
 
-          const segment = Math.sqrt(dx * dx + dy * dy) / 10000;
-          totalDistance += segment;
+            const segment = Math.sqrt(dx * dx + dy * dy + dz * dz) / 10000;
+            totalDistance += segment;
 
-          const locTime = new Date(curr.date).getTime();
+            const locTime = new Date(curr.date).getTime();
 
-          while (
-            carIndex < carData.length - 1 &&
-            new Date(carData[carIndex].date).getTime() < locTime
-          ) {
-            carIndex++;
+            while (
+              carIndex < carData.length - 1 &&
+              new Date(carData[carIndex].date).getTime() < locTime
+            ) {
+              carIndex++;
+            }
+
+            distanceSpeed.push({
+              distance: totalDistance,
+              speed: carData[carIndex].speed,
+            });
           }
 
-          const speed = carData[carIndex].speed;
-
-          distanceSpeed.push({
-            distance: totalDistance,
-            speed: speed,
-          });
+          renderSpeedGraph(distanceSpeed);
+        } catch (error) {
+          console.log(error);
         }
-        renderSpeedGraph(distanceSpeed);
-      } catch (error) {
-        console.log(error);
-      }
-    });
+      })
+
+      .fail(function (xhr) {
+        const err = xhr.responseJSON;
+        console.log(err);
+        alert(err?.message || "Server error");
+      })
+
+      .always(function () {
+        $("#loader").hide();
+      });
   });
 
   $("#lap-reset").on("click", function () {
@@ -164,8 +172,8 @@ function renderGraph(lapData, pitData, number_of_laps) {
     }))
     .filter((d) => !pitLaps.includes(d.lap));
 
-  x.domain([0,number_of_laps]);
-  y.domain([60,150]);
+  x.domain([0, number_of_laps]);
+  y.domain([60, 150]);
 
   const line = d3
     .line()
